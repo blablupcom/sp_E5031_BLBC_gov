@@ -29,13 +29,11 @@ soup = BeautifulSoup(html)
 blocks = soup.findAll('div', {'class': 'document-link'})
 
 for block in blocks:
-
     link = block.a['href']
     parsed_link = urlparse.urlsplit(link.encode('utf8'))
     parsed_link = parsed_link._replace(path=urllib.quote(parsed_link.path))
     encoded_link = parsed_link.geturl()
     pageUrl = encoded_link.replace("/citizen-home", "https://www.barnet.gov.uk/citizen-home")
-
     html2 = urllib2.urlopen(pageUrl)
     soup2 = BeautifulSoup(html2)
     ts = soup2.find('div', {'class': 'text-section'})
@@ -45,15 +43,16 @@ for block in blocks:
         fileUrl = fileBlock.a['href']
         fileUrl = fileUrl.replace("/dam", "https://www.barnet.gov.uk/dam")
 
-        if '.csv' in fileUrl:
+        if '.csv' in fileUrl and '1516' not in fileUrl:
             # create the right strings for the new filename
             title = fileBlock.a.contents[0]
             title = title.upper()
             csvYr = title.split(' ')[-1]
+            if u'£250' in csvYr:
+                continue
             csvMth = title.split(' ')[-2][:3]
             csvMth = convert_mth_strings(csvMth);
             filename = entity_id + "_" + csvYr + "_" + csvMth
             todays_date = str(datetime.now())
             scraperwiki.sqlite.save(unique_keys=['l'], data={"l": fileUrl, "f": filename, "d": todays_date})
-
             print filename
