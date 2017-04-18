@@ -100,18 +100,20 @@ soup = BeautifulSoup(html, 'lxml')
 import urllib
 import urlparse
 
-blocks = soup.findAll('div', {'class': 'document-link'})
+blocks = soup.find('ul', 'nav-level-6').findAll('a')
 
 for block in blocks:
 
-    link = block.a['href']
+    link = block['href']
     parsed_link = urlparse.urlsplit(link.encode('utf8'))
     parsed_link = parsed_link._replace(path=urllib.quote(parsed_link.path))
     encoded_link = parsed_link.geturl()
     pageUrl = encoded_link.replace("/citizen-home", "https://www.barnet.gov.uk/citizen-home")
 
+
     html2 = urllib2.urlopen(pageUrl)
     soup2 = BeautifulSoup(html2, 'lxml')
+
     ts = soup2.find('div', {'class': 'text-section'})
     fileBlocks = ts.findAll('li')
 
